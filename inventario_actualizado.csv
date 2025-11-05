@@ -1,0 +1,11 @@
+id,nombre,precio,stock_inicial,vendido,stock_final
+PROD001,Laptop Gamer Pro,1450.75,10,5,5
+PROD002,Mouse Inalambrico RGB,45.5,50,8,42
+PROD003,Teclado Mecanico TKL,89.99,25,0,25
+PROD004,Monitor 27 pulgadas 4K,599.99,15,2,13
+PROD005,Auriculares Gaming,129.5,30,5,25
+PROD006,Webcam Full HD,85.0,20,15,5
+PROD007,SSD 1TB NVMe,149.99,40,10,30
+PROD008,RAM 16GB DDR4,95.75,35,0,35
+PROD009,Mousepad XXL,25.99,60,10,50
+PROD010,Hub USB-C 7 puertos,45.0,25,5,20

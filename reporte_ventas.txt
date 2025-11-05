@@ -1,0 +1,11 @@
+=== Reporte de Ventas PyTech Store ===
+
+Ingresos Totales: $12,725.03
+
+Producto Más Vendido (unidades): 'Webcam Full HD', con 15 unidades.
+Producto con Mayores Ingresos: 'Laptop Gamer Pro', generando $7,253.75.
+
+--- Ventas No Procesadas ---
+- Stock insuficiente para 'PROD003': Solicitado: 30, Disponible: 25
+- Producto no existe para 'PROD999': Producto 'PROD999' no existe en el catálogo.
+- Stock insuficiente para 'PROD008': Solicitado: 50, Disponible: 35

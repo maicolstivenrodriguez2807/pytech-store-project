@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTech Store - Sistema de Ventas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .header .logo {
+            height: 60px;
+        }
+
+        .header .store-name {
+            color: #00796b;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .card h2 {
+            color: #00796b;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4db6ac 0%, #26a69a 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(77, 182, 172, 0.3);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(77, 182, 172, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .producto-item {
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2f1 100%);
+            padding: 15px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .producto-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-color: #4db6ac;
+        }
+
+        .producto-item h3 {
+            color: #333;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        .producto-item p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .precio {
+            color: #00796b;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .stock {
+            background: #81c784;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00796b;
+            font-size: 1.2em;
+        }
+
+        .spinner {
+            border: 4px solid #e0f2f1;
+            border-top: 4px solid #4db6ac;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .resultados {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .resultados.show {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #80cbc4 0%, #4db6ac 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(77, 182, 172, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(77, 182, 172, 0.4);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .ventas-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .venta-item {
+            background: #f1f8f6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #81c784;
+            transition: all 0.3s ease;
+        }
+
+        .venta-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .venta-item.fallida {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+
+        .venta-item h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .venta-item p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 3px 0;
+        }
+
+        .inventario-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .inventario-table th,
+        .inventario-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .inventario-table th {
+            background: linear-gradient(135deg, #80cbc4 0%, #4db6ac 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .inventario-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #81c784;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffb74d;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #e57373;
+            color: white;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: #00796b;
+        }
+
+        .tab.active {
+            color: #00796b;
+            border-bottom-color: #4db6ac;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #80cbc4;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4db6ac;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .productos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .success-message {
+            background: #81c784;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f1f8f6;
+            border-radius: 10px;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar-label {
+            min-width: 150px;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .bar-container {
+            flex: 1;
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #80cbc4 0%, #4db6ac 100%);
+            border-radius: 10px;
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .watermark-right {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0.4;
+            z-index: 999;
+            pointer-events: none; /* Permite hacer clic a través de la imagen */
+        }
+
+        .watermark-right img {
+            width: 150px;
+            filter: grayscale(100%); /* La hace ver más como una marca de agua */
+        }
+
+        .watermark-left {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            opacity: 0.45;
+            z-index: 999;
+            pointer-events: none;
+            color: #004d40;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark-right">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Universidad_EAN_logo.svg" alt="Marca de agua EAN">
+    </div>
+    <div class="watermark-left">
+        Maicol Rodriguez - Grupo 1
+    </div>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <img src="https://static.vecteezy.com/system/resources/previews/024/672/381/non_2x/shopping-cart-tech-logo-design-template-shopping-cart-online-shop-logo-design-free-vector.jpg" alt="PyTech Store Logo" class="logo">
+                <span class="store-name">PyTech Store</span>
+            </h1>
+            <p>Sistema de Gestión de Inventario y Ventas</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2><span class="icon">📦</span> Catálogo de Productos</h2>
+                <div id="productos-container" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando productos...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">⚡</span> Panel de Control</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Procesa las ventas del archivo <strong>ventas.csv</strong> y actualiza el inventario automáticamente.
+                </p>
+                <button id="btn-procesar" class="btn-primary" onclick="procesarVentas()">
+                    🚀 Procesar Ventas
+                </button>
+                <div id="processing-status" style="display: none; margin-top: 20px; text-align: center;">
+                    <div class="spinner"></div>
+                    <p style="color: #00796b; font-weight: bold;">Procesando ventas...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultados" class="resultados">
+            <div class="success-message">
+                ✅ ¡Ventas procesadas exitosamente!
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>💰 Ingresos Totales</h3>
+                    <div class="value" id="ingresos-totales">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>✅ Ventas Exitosas</h3>
+                    <div class="value" id="ventas-exitosas">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>❌ Ventas Rechazadas</h3>
+                    <div class="value" id="ventas-fallidas">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 Total Procesadas</h3>
+                    <div class="value" id="total-ventas">0</div>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <h2><span class="icon">🏆</span> Productos Destacados</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div style="background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%); padding: 20px; border-radius: 15px; color: white;">
+                        <h3 style="margin-bottom: 10px; opacity: 0.9;">🥇 Más Vendido (Unidades)</h3>
+                        <div id="producto-mas-vendido" style="font-size: 1.2em; font-weight: bold;">-</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%); padding: 20px; border-radius: 15px; color: white;">
+                        <h3 style="margin-bottom: 10px; opacity: 0.9;">💎 Mayores Ingresos</h3>
+                        <div id="producto-mayores-ingresos" style="font-size: 1.2em; font-weight: bold;">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <div class="tabs">
+                    <button class="tab active" onclick="cambiarTab('ventas')">📋 Detalle de Ventas</button>
+                    <button class="tab" onclick="cambiarTab('inventario')">📦 Inventario Actualizado</button>
+                    <button class="tab" onclick="cambiarTab('graficos')">📊 Gráficos</button>
+                </div>
+
+                <div id="tab-ventas" class="tab-content active">
+                    <h3 style="color: #66bb6a; margin-bottom: 15px;">✅ Ventas Exitosas</h3>
+                    <div id="ventas-exitosas-list" class="ventas-list"></div>
+
+                    <h3 style="color: #ef5350; margin-top: 30px; margin-bottom: 15px;">❌ Ventas Rechazadas</h3>
+                    <div id="ventas-fallidas-list" class="ventas-list"></div>
+                </div>
+
+                <div id="tab-inventario" class="tab-content">
+                    <div id="inventario-actualizado"></div>
+                </div>
+
+                <div id="tab-graficos" class="tab-content">
+                    <h3 style="color: #00796b; margin-bottom: 15px;">📊 Ventas por Producto</h3>
+                    <div id="chart-ventas" class="chart-container"></div>
+
+                    <h3 style="color: #00796b; margin-top: 30px; margin-bottom: 15px;">💰 Ingresos por Producto</h3>
+                    <div id="chart-ingresos" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar productos al iniciar
+        window.onload = function() {
+            cargarProductos();
+        };
+
+        function cargarProductos() {
+            fetch('/api/productos')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('productos-container');
+                    container.className = 'productos-grid';
+                    container.innerHTML = '';
+
+                    data.forEach(producto => {
+                        const item = document.createElement('div');
+                        item.className = 'producto-item';
+                        item.innerHTML = `
+                            <h3>${producto.nombre}</h3>
+                            <p><strong>ID:</strong> ${producto.id}</p>
+                            <p class="precio">$${producto.precio.toFixed(2)}</p>
+                            <span class="stock">Stock: ${producto.stock}</span>
+                        `;
+                        container.appendChild(item);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('productos-container').innerHTML = 
+                        '<p style="color: red;">Error al cargar productos</p>';
+                });
+        }
+
+        function procesarVentas() {
+            const btn = document.getElementById('btn-procesar');
+            const status = document.getElementById('processing-status');
+            
+            btn.disabled = true;
+            status.style.display = 'block';
+
+            fetch('/api/procesar')
+                .then(response => response.json())
+                .then(data => {
+                    // Actualizar estadísticas
+                    document.getElementById('ingresos-totales').textContent = 
+                        `$${data.ingresos_totales.toFixed(2)}`;
+                    document.getElementById('ventas-exitosas').textContent = 
+                        data.total_ventas_exitosas;
+                    document.getElementById('ventas-fallidas').textContent = 
+                        data.total_ventas_fallidas;
+                    document.getElementById('total-ventas').textContent = 
+                        data.total_ventas_exitosas + data.total_ventas_fallidas;
+
+                    // Productos destacados
+                    if (data.producto_mas_vendido) {
+                        document.getElementById('producto-mas-vendido').innerHTML = 
+                            `${data.producto_mas_vendido.nombre}<br><small>${data.producto_mas_vendido.unidades} unidades</small>`;
+                    }
+
+                    if (data.producto_mayores_ingresos) {
+                        document.getElementById('producto-mayores-ingresos').innerHTML = 
+                            `${data.producto_mayores_ingresos.nombre}<br><small>$${data.producto_mayores_ingresos.ingresos.toFixed(2)}</small>`;
+                    }
+
+                    // Ventas exitosas
+                    const ventasExitosasList = document.getElementById('ventas-exitosas-list');
+                    ventasExitosasList.innerHTML = '';
+                    data.ventas_exitosas.forEach(venta => {
+                        const item = document.createElement('div');
+                        item.className = 'venta-item';
+                        item.innerHTML = `
+                            <h4>Venta #${venta.numero} - ${venta.nombre}</h4>
+                            <p><strong>ID:</strong> ${venta.id_producto}</p>
+                            <p><strong>Cantidad:</strong> ${venta.cantidad} unidades</p>
+                            <p><strong>Precio unitario:</strong> $${venta.precio_unitario.toFixed(2)}</p>
+                            <p><strong>Ingreso:</strong> $${venta.ingreso.toFixed(2)}</p>
+                            <p><strong>Stock restante:</strong> ${venta.stock_restante}</p>
+                        `;
+                        ventasExitosasList.appendChild(item);
+                    });
+
+                    // Ventas fallidas
+                    const ventasfallidasList = document.getElementById('ventas-fallidas-list');
+                    ventasfallidasList.innerHTML = '';
+                    if (data.ventas_fallidas.length === 0) {
+                        ventasfallidasList.innerHTML = '<p style="color: #66bb6a; text-align: center; padding: 20px;">¡Todas las ventas fueron exitosas! 🎉</p>';
+                    } else {
+                        data.ventas_fallidas.forEach(venta => {
+                            const item = document.createElement('div');
+                            item.className = 'venta-item fallida';
+                            item.innerHTML = `
+                                <h4>Venta #${venta.numero} - ${venta.id_producto}</h4>
+                                <p><strong>Razón:</strong> ${venta.razon}</p>
+                                <p>${venta.mensaje}</p>
+                            `;
+                            ventasfallidasList.appendChild(item);
+                        });
+                    }
+
+                    // Inventario actualizado
+                    const inventarioDiv = document.getElementById('inventario-actualizado');
+                    let tableHTML = `
+                        <table class="inventario-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Stock Inicial</th>
+                                    <th>Vendido</th>
+                                    <th>Stock Final</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.inventario_actualizado.forEach(item => {
+                        let badge = '';
+                        if (item.stock_final === 0) {
+                            badge = '<span class="badge badge-danger">Agotado</span>';
+                        } else if (item.stock_final < 10) {
+                            badge = '<span class="badge badge-warning">Bajo</span>';
+                        } else {
+                            badge = '<span class="badge badge-success">Disponible</span>';
+                        }
+
+                        tableHTML += `
+                            <tr>
+                                <td>${item.id}</td>
+                                <td>${item.nombre}</td>
+                                <td>$${item.precio.toFixed(2)}</td>
+                                <td>${item.stock_inicial}</td>
+                                <td>${item.vendido}</td>
+                                <td>${item.stock_final}</td>
+                                <td>${badge}</td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += '</tbody></table>';
+                    inventarioDiv.innerHTML = tableHTML;
+
+                    // Gráficos
+                    crearGraficos(data.ventas_por_producto);
+
+                    // Mostrar resultados
+                    document.getElementById('resultados').classList.add('show');
+                    
+                    // Scroll suave a resultados
+                    setTimeout(() => {
+                        document.getElementById('resultados').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }, 300);
+
+                    status.style.display = 'none';
+                    btn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al procesar ventas');
+                    status.style.display = 'none';
+                    btn.disabled = false;
+                });
+        }
+
+        function cambiarTab(tab) {
+            // Remover active de todos los tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Activar tab seleccionado
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        function crearGraficos(ventasPorProducto) {
+            // Ordenar por unidades
+            const porUnidades = [...ventasPorProducto].sort((a, b) => b.unidades - a.unidades);
+            const porIngresos = [...ventasPorProducto].sort((a, b) => b.ingresos - a.ingresos);
+
+            // Gráfico de unidades
+            const chartVentas = document.getElementById('chart-ventas');
+            chartVentas.innerHTML = '<div class="bar-chart"></div>';
+            const barChartVentas = chartVentas.querySelector('.bar-chart');
+
+            const maxUnidades = Math.max(...porUnidades.map(p => p.unidades));
+            porUnidades.forEach(producto => {
+                const width = (producto.unidades / maxUnidades) * 100;
+                const barItem = document.createElement('div');
+                barItem.className = 'bar-item';
+                barItem.innerHTML = `
+                    <div class="bar-label">${producto.nombre}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: ${width}%">${producto.unidades}</div>
+                    </div>
+                `;
+                barChartVentas.appendChild(barItem);
+            });
+
+            // Gráfico de ingresos
+            const chartIngresos = document.getElementById('chart-ingresos');
+            chartIngresos.innerHTML = '<div class="bar-chart"></div>';
+            const barChartIngresos = chartIngresos.querySelector('.bar-chart');
+
+            const maxIngresos = Math.max(...porIngresos.map(p => p.ingresos));
+            porIngresos.forEach(producto => {
+                const width = (producto.ingresos / maxIngresos) * 100;
+                const barItem = document.createElement('div');
+                barItem.className = 'bar-item';
+                barItem.innerHTML = `
+                    <div class="bar-label">${producto.nombre}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: ${width}%">$${producto.ingresos.toFixed(2)}</div>
+                    </div>
+                `;
+                barChartIngresos.appendChild(barItem);
+            });
+        }
+    </script>
+</body>
+</html>
